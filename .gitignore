@@ -1,22 +1,33 @@
-# --- Secretos y config local ---
+$contenido = @'
+# Configuracion local (NO subir!)
+config.json
 config.local.ps1
+*.local.json
 *.local.ps1
-.env
 
-# --- Artefactos generados (contienen el webhook inyectado) ---
+# Payloads generados
 payload.b64.txt
 payload_ducky.txt
-_decoded_check.ps1
+payloads/payload.b64.txt
+payloads/payload_ducky.txt
 
-# --- Logs ---
+# Logs del payload
 *.log
+badusb_recon_*.log
 
-# --- Sistema ---
+# Outputs de herramientas
+_decoded_check.ps1
+*.tmp
+
+# Sistema
 Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
+desktop.ini
+.DS_Store
 
-# --- IDE / Editores ---
+# IDE
 .vscode/
 .idea/
 *.swp
+'@
+
+[IO.File]::WriteAllText("$PWD\.gitignore", $contenido, [Text.UTF8Encoding]::new($false))
