@@ -1,21 +1,22 @@
-# Artefactos generados (pueden contener secretos)
-payload.b64.txt
-payload_ducky.txt
-_decoded_check.ps1
-
-# Config local con secretos
+# --- Secretos y config local ---
 config.local.ps1
 *.local.ps1
 .env
 
-# Logs
+# --- Artefactos generados (contienen el webhook inyectado) ---
+payload.b64.txt
+payload_ducky.txt
+_decoded_check.ps1
+
+# --- Logs ---
 *.log
 
-# Sistema
+# --- Sistema ---
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# IDE
+# --- IDE / Editores ---
 .vscode/
 .idea/
+*.swp
