@@ -4,7 +4,7 @@
 # Entorno : Windows 10/11, PowerShell 5.1+
 # Uso     : Educativo / laboratorio propio
 # Autor   : 14ND3R
-# Repo    : https://github.com/AndYLndR/badusb-recon-lab
+# Repo    : https://github.com/AndYLndR/badusb-recon
 # ============================================================
 
 param(
@@ -58,6 +58,7 @@ if (-not $Config.Webhook -or $Config.Webhook -like "*PLACEHOLDER*") {
 }
 
 # 4. Placeholder final
+
 if (-not $Config.Webhook) {
     $Config.Webhook = "PLACEHOLDER_WEBHOOK"
 }
@@ -73,20 +74,6 @@ if ($Webhook -like "*PLACEHOLDER*" -or $Webhook -like "*XXX*" -or $Webhook -notm
     Write-Host "      1. Ejecutar con -Webhook <url>"
     Write-Host "      2. Crear config.local.ps1 con `$Config.Webhook"
     Write-Host "      3. Exportar `$env:DISCORD_WEBHOOK"
-    exit 1
-}
-
-$Webhook = $Config.Webhook
-$MaxLen  = $Config.MaxLen
-$DelayMs = $Config.DelayMs
-
-# Si llegados a este punto sigue siendo placeholder, no podemos enviar nada
-if ($Webhook -like "*PLACEHOLDER*" -or $Webhook -like "*XXX*") {
-    Write-Host "[-] No se ha configurado el webhook. Abortando." -ForegroundColor Red
-    Write-Host "    Opciones:" -ForegroundColor Yellow
-    Write-Host "      1. Copia config.example.ps1 a config.local.ps1 y edítalo"
-    Write-Host "      2. Exporta `$env:DISCORD_WEBHOOK"
-    Write-Host "      3. Usa encode_base64.ps1 -Webhook <url>"
     exit 1
 }
 
