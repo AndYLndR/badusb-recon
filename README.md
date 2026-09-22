@@ -147,25 +147,6 @@ notepad .\config.local.ps1   # pega tu webhook real
 > `config.local.ps1` y los archivos generados (`payload_ducky.txt`)
 > estan en `.gitignore` y **no se suben al repositorio**.
 
----
-
-## Quick Start
-
-```powershell
-# 1. Clonar el repo
-git clone https://github.com/AndYLndR/badusb-recon.git
-cd badusb-recon
-
-# 2. Configurar el webhook (solo la primera vez)
-Copy-Item .\config.example.ps1 .\config.local.ps1
-notepad .\config.local.ps1   # pega tu webhook real
-
-# 3. Generar el Ducky Script
-.\build.ps1
-
-# 4. Copia payload_ducky.txt a la SD del Flipper (carpeta badusb/)
-# 5. Desconecta el Flipper y ejecuta el payload contra el sistema objetivo
-
 --
 
 # Uso detallado
@@ -202,7 +183,7 @@ En el Flipper: Apps -> BadUSB -> payload_ducky.txt -> Run.
 
 Los bloques llegan a Discord en ~10-30 segundos.
 
-
+```
 ---
 
 # Deteccion por antivirus
