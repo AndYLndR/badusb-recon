@@ -1,0 +1,21 @@
+# Artefactos generados (pueden contener secretos)
+payload.b64.txt
+payload_ducky.txt
+_decoded_check.ps1
+
+# Config local con secretos
+config.local.ps1
+*.local.ps1
+.env
+
+# Logs
+*.log
+
+# Sistema
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE
+.vscode/
+.idea/
